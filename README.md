@@ -1,7 +1,7 @@
 A pure Go Redis-cli 
 ==================
 
-This is a simple redis-cli forked from https://github.com/siddontang/ledisdb(ledis-cli)
+This is a simple redis-cli forked from https://github.com/siddontang/ledisdb(ledis-cli).
 Fully compatible with [Redis Protocol specification](https://redis.io/topics/protocol).
 
 ### Why I build this?
@@ -27,7 +27,7 @@ Receiving objects:   2% (1242/45784), 300.01 KiB | 7 KiB/s
 
 The network condition really drives me crazy.
 
-People who has C/C++ backrground must know that you can't simply copy a linux exetuable file
+People who has C/C++ backrground must know that you can't simply copy a linux executable file
 from one machine to another and make it run successfully, because sometimes the target machine
 lacks of the matched glibc or other .so files.
 
