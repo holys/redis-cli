@@ -45,3 +45,7 @@ So I just want a pure go solution，build once, and run everywhere(aha Java).
 Please correct me if I am wrong.
 
 
+
+LICENSE
+
+MIT LICENSE, see LICENSE for details.
