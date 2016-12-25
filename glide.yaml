@@ -1,0 +1,4 @@
+package: github.com/holys/redis-cli
+import:
+- package: github.com/holys/goredis
+- package: github.com/peterh/liner
