@@ -1,7 +1,7 @@
 A pure Go Redis-cli 
 ==================
 
-This is a simple redis-cli forked from https://github.com/siddontang/ledisdb(ledis-cli).
+This is a simple redis-cli forked from [https://github.com/siddontang/ledisdb(ledis-cli)](https://github.com/siddontang/ledisdb).
 Fully compatible with [Redis Protocol specification](https://redis.io/topics/protocol).
 
 ### Why I build this?
