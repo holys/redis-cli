@@ -125,11 +125,8 @@ func (c *Conn) Receive() (interface{}, error) {
 		c.Close()
 		return nil, err
 	} else {
-		if e, ok := reply.(Error); ok {
-			return reply, e
-		} else {
-			return reply, nil
-		}
+		// no need to check  reply.(Error)
+		return reply, nil
 	}
 }
 

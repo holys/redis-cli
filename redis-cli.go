@@ -13,19 +13,36 @@ import (
 	"github.com/peterh/liner"
 )
 
-var hostname = flag.String("h", "127.0.0.1", "Server hostname")
-var port = flag.Int("p", 6379, "Server server port")
-var socket = flag.String("s", "", "Server socket. (overwrites hostname and port)")
-var dbn = flag.Int("n", 0, "Database number(default 0)")
-var auth = flag.String("a", "", "Password to use when connecting to the server")
+var (
+	hostname  = flag.String("h", "127.0.0.1", "Server hostname")
+	port      = flag.Int("p", 6379, "Server server port")
+	socket    = flag.String("s", "", "Server socket. (overwrites hostname and port)")
+	dbn       = flag.Int("n", 0, "Database number(default 0)")
+	auth      = flag.String("a", "", "Password to use when connecting to the server")
+	outputRaw = flag.Bool("raw", false, "Use raw formatting for replies")
+)
 
 var (
 	line        *liner.State
 	historyPath = path.Join(os.Getenv("HOME"), ".rediscli_history") // $HOME/.rediscli_history
+
+	mode int
+)
+
+//output
+const (
+	stdMode = iota
+	rawMode
 )
 
 func main() {
 	flag.Parse()
+
+	if *outputRaw {
+		mode = rawMode
+	} else {
+		mode = stdMode
+	}
 
 	line = liner.NewLiner()
 	defer line.Close()
@@ -89,12 +106,12 @@ func main() {
 				}
 
 				if err != nil {
-					fmt.Printf("%s", err.Error())
+					fmt.Printf("(error) %s", err.Error())
 				} else {
 					if cmd == "info" {
 						printInfo(r.([]byte))
 					} else {
-						printReply(0, r)
+						printReply(0, r, mode)
 					}
 				}
 
@@ -109,7 +126,19 @@ func printInfo(s []byte) {
 	fmt.Printf("%s", s)
 }
 
-func printReply(level int, reply interface{}) {
+func printReply(level int, reply interface{}, mode int) {
+	switch mode {
+	case stdMode:
+		printStdReply(level, reply)
+	case rawMode:
+		printRawReply(level, reply)
+	default:
+		printStdReply(level, reply)
+	}
+
+}
+
+func printStdReply(level int, reply interface{}) {
 	switch reply := reply.(type) {
 	case int64:
 		fmt.Printf("(integer) %d", reply)
@@ -120,7 +149,7 @@ func printReply(level int, reply interface{}) {
 	case nil:
 		fmt.Printf("(nil)")
 	case goredis.Error:
-		fmt.Printf("%s", string(reply))
+		fmt.Printf("(error) %s", string(reply))
 	case []interface{}:
 		for i, v := range reply {
 			if i != 0 {
@@ -130,13 +159,41 @@ func printReply(level int, reply interface{}) {
 			s := fmt.Sprintf("%d) ", i+1)
 			fmt.Printf("%-4s", s)
 
-			printReply(level+1, v)
+			printStdReply(level+1, v)
 			if i != len(reply)-1 {
 				fmt.Printf("\n")
 			}
 		}
 	default:
-		fmt.Printf("invalid reply")
+		fmt.Printf("Unknown reply type: %+v", reply)
+	}
+}
+
+func printRawReply(level int, reply interface{}) {
+	switch reply := reply.(type) {
+	case int64:
+		fmt.Printf("%d", reply)
+	case string:
+		fmt.Printf("%s", reply)
+	case []byte:
+		fmt.Printf("%s", reply)
+	case nil:
+		// do nothing
+	case goredis.Error:
+		fmt.Printf("%s\n", string(reply))
+	case []interface{}:
+		for i, v := range reply {
+			if i != 0 {
+				fmt.Printf("%s", strings.Repeat(" ", level*4))
+			}
+
+			printRawReply(level+1, v)
+			if i != len(reply)-1 {
+				fmt.Printf("\n")
+			}
+		}
+	default:
+		fmt.Printf("Unknown reply type: %+v", reply)
 	}
 }
 
