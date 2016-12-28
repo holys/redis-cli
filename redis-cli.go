@@ -275,7 +275,7 @@ func loadHisotry() {
 
 func saveHisotry() {
 	if f, err := os.Create(historyPath); err != nil {
-		fmt.Printf("Error writing history file: ", err)
+		fmt.Printf("Error writing history file: %s", err.Error())
 	} else {
 		line.WriteHistory(f)
 		f.Close()
