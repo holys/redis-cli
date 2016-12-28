@@ -46,12 +46,10 @@ func main() {
 
 	line = liner.NewLiner()
 	defer line.Close()
-
 	line.SetCtrlCAborts(true)
 
 	setCompletionHandler()
 	loadHisotry()
-
 	defer saveHisotry()
 
 	var addr string
@@ -99,6 +97,8 @@ func main() {
 			cmd := strings.ToLower(cmds[0])
 			if cmd == "help" || cmd == "?" {
 				printHelp(cmds)
+			} else if cmd == "quit" || cmd == "exit" {
+				os.Exit(0)
 			} else {
 				r, err := c.Do(cmds[0], args...)
 
