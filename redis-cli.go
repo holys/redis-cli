@@ -63,6 +63,7 @@ func main() {
 
 	c := goredis.NewClient(addr, "")
 	c.SetMaxIdleConns(1)
+	sendPing(c)
 	sendSelect(c, *dbn)
 	sendAuth(c, *auth)
 
@@ -250,6 +251,13 @@ func sendAuth(client *goredis.Client, passwd string) {
 	}
 
 	_, err := client.Do("AUTH", passwd)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+	}
+}
+
+func sendPing(client *goredis.Client) {
+	_, err := client.Do("PING")
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
