@@ -27,6 +27,8 @@ var (
 	historyPath = path.Join(os.Getenv("HOME"), ".rediscli_history") // $HOME/.rediscli_history
 
 	mode int
+
+	client *goredis.Client
 )
 
 //output
@@ -44,30 +46,26 @@ func main() {
 		mode = stdMode
 	}
 
+	// Start interactive mode when no command is provided
+	if flag.NArg() == 0 {
+		repl()
+	}
+
+	noninteractive(flag.Args())
+}
+
+// Read-Eval-Print Loop
+func repl() {
 	line = liner.NewLiner()
 	defer line.Close()
-
 	line.SetCtrlCAborts(true)
 
 	setCompletionHandler()
 	loadHisotry()
-
 	defer saveHisotry()
 
-	var addr string
-	if len(*socket) > 0 {
-		addr = *socket
-	} else {
-		addr = fmt.Sprintf("%s:%d", *hostname, *port)
-	}
-
-	c := goredis.NewClient(addr, "")
-	c.SetMaxIdleConns(1)
-	sendSelect(c, *dbn)
-	sendAuth(c, *auth)
-
+	addr := addr()
 	reg, _ := regexp.Compile(`'.*?'|".*?"|\S+`)
-
 	prompt := ""
 
 	for {
@@ -89,37 +87,74 @@ func main() {
 		} else {
 			line.AppendHistory(cmd)
 
-			args := make([]interface{}, len(cmds[1:]))
-
-			for i := range args {
-				args[i] = strings.Trim(string(cmds[1+i]), "\"'")
-			}
-
 			cmd := strings.ToLower(cmds[0])
 			if cmd == "help" || cmd == "?" {
 				printHelp(cmds)
+			} else if cmd == "quit" || cmd == "exit" {
+				os.Exit(0)
+			} else if cmd == "clear" {
+				println("Please use Ctrl + L instead")
 			} else {
-				r, err := c.Do(cmds[0], args...)
-
-				if err == nil && strings.ToLower(cmds[0]) == "select" {
-					*dbn, _ = strconv.Atoi(cmds[1])
-				}
-
-				if err != nil {
-					fmt.Printf("(error) %s", err.Error())
-				} else {
-					if cmd == "info" {
-						printInfo(r.([]byte))
-					} else {
-						printReply(0, r, mode)
-					}
-				}
-
-				fmt.Printf("\n")
+				cliSendCommand(cmds)
 			}
-
 		}
 	}
+}
+
+func cliSendCommand(cmds []string) {
+	cliConnect()
+
+	if len(cmds) == 0 {
+		return
+	}
+
+	args := make([]interface{}, len(cmds[1:]))
+	for i := range args {
+		args[i] = strings.Trim(string(cmds[1+i]), "\"'")
+	}
+
+	cmd := strings.ToLower(cmds[0])
+
+	r, err := client.Do(cmd, args...)
+	if err == nil && strings.ToLower(cmd) == "select" {
+		*dbn, _ = strconv.Atoi(cmds[1])
+	}
+	if err != nil {
+		fmt.Printf("(error) %s", err.Error())
+	} else {
+		if cmd == "info" {
+			printInfo(r.([]byte))
+		} else {
+			printReply(0, r, mode)
+		}
+	}
+
+	fmt.Printf("\n")
+}
+
+func cliConnect() {
+	if client == nil {
+		addr := addr()
+		client = goredis.NewClient(addr, "")
+		client.SetMaxIdleConns(1)
+		sendPing(client)
+		sendSelect(client, *dbn)
+		sendAuth(client, *auth)
+	}
+}
+
+func addr() string {
+	var addr string
+	if len(*socket) > 0 {
+		addr = *socket
+	} else {
+		addr = fmt.Sprintf("%s:%d", *hostname, *port)
+	}
+	return addr
+}
+
+func noninteractive(args []string) {
+	cliSendCommand(args)
 }
 
 func printInfo(s []byte) {
@@ -250,6 +285,13 @@ func sendAuth(client *goredis.Client, passwd string) {
 	}
 
 	_, err := client.Do("AUTH", passwd)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+	}
+}
+
+func sendPing(client *goredis.Client) {
+	_, err := client.Do("PING")
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
