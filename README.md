@@ -1,5 +1,6 @@
 A pure Go Redis-cli 
 ==================
+[![Go Report Card](https://goreportcard.com/badge/github.com/holys/redis-cli)](https://goreportcard.com/report/github.com/holys/redis-cli)
 
 This is a simple redis-cli forked from [https://github.com/siddontang/ledisdb(ledis-cli)](https://github.com/siddontang/ledisdb).
 Fully compatible with [Redis Protocol specification](https://redis.io/topics/protocol).
@@ -46,6 +47,6 @@ Please correct me if I am wrong.
 
 
 
-LICENSE
+## LICENSE
 
 MIT LICENSE, see LICENSE for details.
