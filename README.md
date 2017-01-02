@@ -5,6 +5,70 @@ A pure Go Redis-cli
 This is a simple redis-cli forked from [https://github.com/siddontang/ledisdb(ledis-cli)](https://github.com/siddontang/ledisdb).
 Fully compatible with [Redis Protocol specification](https://redis.io/topics/protocol).
 
+
+### Features 
+
+- Pure Go implementation, build once and run everywhere
+- Full compatible with [Redis Protocol specification](https://redis.io/topics/protocol)
+- Basic support for hostname, port, auth, db
+- REPL 
+- Non-interactively execute command 
+- Raw format output
+- Monitor command support (both in REPL and execution directly)
+
+### Install 
+
+To install, use `go get`
+```
+go get -u -v github.com/holys/redis-cli 
+```
+
+or download binary file from [release](https://github.com/holys/redis-cli/releases).
+
+### Usage
+
+```
+$ ./redis-cli --help
+Usage of ./redis-cli:
+  -a string
+        Password to use when connecting to the server
+  -h string
+        Server hostname (default "127.0.0.1")
+  -n int
+        Database number(default 0)
+  -p int
+        Server server port (default 6379)
+  -raw
+        Use raw formatting for replies
+  -s string
+        Server socket. (overwrites hostname and port)
+
+Almost the same as the official redis-cli.
+
+$ ./redis-cli
+127.0.0.1:6379> get info
+"{\"age\":1,\"name\":\"cdh\"}"
+
+$ ./redis-cli --raw
+127.0.0.1:6379> get info
+{"age":1,"name":"cdh"}
+
+$ ./redis-cli get info
+"{\"age\":1,\"name\":\"cdh\"}"
+
+$ ./redis-cli --raw get info
+{"age":1,"name":"cdh"}
+
+$ ./redis-cli monitor
+OK
+1483327130.764598 [0 127.0.0.1:61344] "PING"
+1483327133.769646 [0 127.0.0.1:61344] "PING"
+1483327136.768431 [0 127.0.0.1:61344] "PING"
+1483327139.767084 [0 127.0.0.1:61344] "PING"
+ ...
+
+```
+
 ### Why I build this?
 
 Sometimes I would like to access to the redis-server(or redis-proxy), but there is no redis-cli in the
@@ -47,6 +111,19 @@ Please correct me if I am wrong.
 
 
 
-## LICENSE
+### Contributing
 
-MIT LICENSE, see LICENSE for details.
+1. Fork it
+2. Create your feature branch (git checkout -b my-new-feature)
+3. Commit your changes (git commit -am 'Add some feature')
+4. Push to the branch (git push origin my-new-feature)
+5. Create new Pull Request
+
+
+### LICENSE
+
+MIT LICENSE, see [LICENSE](./LICENSE) for details.
+
+### Author
+
+[David Chen (a.k.a holys)](https://github.com/holys)
