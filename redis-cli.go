@@ -68,6 +68,8 @@ func repl() {
 	reg, _ := regexp.Compile(`'.*?'|".*?"|\S+`)
 	prompt := ""
 
+	cliConnect()
+
 	for {
 		if *dbn > 0 && *dbn < 16 {
 			prompt = fmt.Sprintf("%s[%d]> ", addr, *dbn)
@@ -114,6 +116,27 @@ func cliSendCommand(cmds []string) {
 	}
 
 	cmd := strings.ToLower(cmds[0])
+
+	if cmd == "monitor" {
+		respChan := make(chan interface{})
+		stopChan := make(chan struct{})
+		err := client.Monitor(respChan, stopChan)
+		if err != nil {
+			fmt.Printf("(error) %s\n", err.Error())
+			return
+		}
+		for {
+			select {
+			case mr := <-respChan:
+				printReply(0, mr, mode)
+				fmt.Printf("\n")
+			case <-stopChan:
+				fmt.Println("Error: Server closed the connection")
+				return
+			}
+		}
+
+	}
 
 	r, err := client.Do(cmd, args...)
 	if err == nil && strings.ToLower(cmd) == "select" {

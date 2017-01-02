@@ -2,6 +2,7 @@ package goredis
 
 import (
 	"container/list"
+	"io"
 	"net"
 	"strings"
 	"sync"
@@ -96,22 +97,54 @@ func (c *Client) Do(cmd string, args ...interface{}) (interface{}, error) {
 
 		r, err = co.Do(cmd, args...)
 		if err != nil {
-			// co.Close()
-
 			if e, ok := err.(*net.OpError); ok && strings.Contains(e.Error(), "use of closed network connection") {
 				//send to a closed connection, try again
 				continue
 			}
 			c.put(co)
 			return nil, err
-		} else {
-			c.put(co)
 		}
 
+		c.put(co)
 		return r, nil
 	}
 
 	return nil, err
+}
+
+func (c *Client) Monitor(respChan chan interface{}, stopChan chan struct{}) error {
+	var co *Conn
+	var err error
+
+	co, err = c.get()
+	if err != nil {
+		return err
+	}
+
+	if err := co.Send("MONITOR"); err != nil {
+		return err
+	}
+
+	go func() {
+		defer func() {
+			c.put(co)
+		}()
+
+		for {
+			resp, err := co.Receive()
+			if err != nil {
+				if e, ok := err.(*net.OpError); ok && strings.Contains(e.Error(), "use of closed network connection") || err == io.EOF {
+					//the server may has closed the connection
+					stopChan <- struct{}{}
+					return
+				}
+				respChan <- err
+			}
+			respChan <- resp
+		}
+	}()
+
+	return nil
 }
 
 func (c *Client) Close() {
