@@ -8,7 +8,7 @@ Fully compatible with [Redis Protocol specification](https://redis.io/topics/pro
 
 ### Features 
 
-- Pure Go implementation, build once and run everywhere
+- Pure Go implementation
 - Full compatible with [Redis Protocol specification](https://redis.io/topics/protocol)
 - Basic support for hostname, port, auth, db
 - REPL 
