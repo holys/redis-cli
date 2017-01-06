@@ -146,7 +146,7 @@ func cliSendCommand(cmds []string) {
 		fmt.Printf("(error) %s", err.Error())
 	} else {
 		if cmd == "info" {
-			printInfo(r.([]byte))
+			printInfo(r)
 		} else {
 			printReply(0, r, mode)
 		}
@@ -180,8 +180,14 @@ func noninteractive(args []string) {
 	cliSendCommand(args)
 }
 
-func printInfo(s []byte) {
-	fmt.Printf("%s", s)
+func printInfo(reply interface{}) {
+	switch reply := reply.(type) {
+	case []byte:
+		fmt.Printf("%s", reply)
+	//some redis proxies don't support this command.
+	case goredis.Error:
+		fmt.Printf("(error) %s", string(reply))
+	}
 }
 
 func printReply(level int, reply interface{}, mode int) {
