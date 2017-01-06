@@ -61,16 +61,16 @@ func repl() {
 	line.SetCtrlCAborts(true)
 
 	setCompletionHandler()
-	loadHisotry()
-	defer saveHisotry()
+	loadHistory()
+	defer saveHistory()
 
-	addr := addr()
 	reg, _ := regexp.Compile(`'.*?'|".*?"|\S+`)
 	prompt := ""
 
 	cliConnect()
 
 	for {
+		addr := addr()
 		if *dbn > 0 && *dbn < 16 {
 			prompt = fmt.Sprintf("%s[%d]> ", addr, *dbn)
 		} else {
@@ -96,6 +96,8 @@ func repl() {
 				os.Exit(0)
 			} else if cmd == "clear" {
 				println("Please use Ctrl + L instead")
+			} else if cmd == "connect" {
+				reconnect(cmds[1:])
 			} else {
 				cliSendCommand(cmds)
 			}
@@ -164,6 +166,44 @@ func cliConnect() {
 		sendSelect(client, *dbn)
 		sendAuth(client, *auth)
 	}
+}
+
+func reconnect(args []string) {
+	if len(args) < 2 {
+		fmt.Println("(error) invalid connect arguments. At least provides host and port.")
+		return
+	}
+
+	h := args[0]
+	p := args[1]
+
+	var auth string
+	if len(args) > 2 {
+		auth = args[2]
+	}
+
+	if h != "" && p != "" {
+		addr := fmt.Sprintf("%s:%s", h, p)
+		client = goredis.NewClient(addr, "")
+	}
+
+	if err := sendPing(client); err != nil {
+		return
+	}
+
+	// change prompt
+	hostname = &h
+	intp, _ := strconv.Atoi(p)
+	port = &intp
+
+	if auth != "" {
+		err := sendAuth(client, auth)
+		if err != nil {
+			return
+		}
+	}
+
+	fmt.Printf("connected %s:%s successfully \n", h, p)
 }
 
 func addr() string {
@@ -307,23 +347,34 @@ func sendSelect(client *goredis.Client, index int) {
 	}
 }
 
-func sendAuth(client *goredis.Client, passwd string) {
+func sendAuth(client *goredis.Client, passwd string) error {
 	if passwd == "" {
 		// do nothing
-		return
+		return nil
 	}
 
-	_, err := client.Do("AUTH", passwd)
+	resp, err := client.Do("AUTH", passwd)
 	if err != nil {
-		fmt.Printf("%s\n", err.Error())
+		fmt.Printf("(error) %s\n", err.Error())
+		return err
 	}
+
+	switch resp := resp.(type) {
+	case goredis.Error:
+		fmt.Printf("(error) %s\n", resp.Error())
+		return resp
+	}
+
+	return nil
 }
 
-func sendPing(client *goredis.Client) {
+func sendPing(client *goredis.Client) error {
 	_, err := client.Do("PING")
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
+		return err
 	}
+	return nil
 }
 
 func setCompletionHandler() {
@@ -337,14 +388,14 @@ func setCompletionHandler() {
 	})
 }
 
-func loadHisotry() {
+func loadHistory() {
 	if f, err := os.Open(historyPath); err == nil {
 		line.ReadHistory(f)
 		f.Close()
 	}
 }
 
-func saveHisotry() {
+func saveHistory() {
 	if f, err := os.Create(historyPath); err != nil {
 		fmt.Printf("Error writing history file: %s", err.Error())
 	} else {
