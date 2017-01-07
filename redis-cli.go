@@ -87,7 +87,7 @@ func repl() {
 		if len(cmds) == 0 {
 			continue
 		} else {
-			line.AppendHistory(cmd)
+			appendHistory(cmds)
 
 			cmd := strings.ToLower(cmds[0])
 			if cmd == "help" || cmd == "?" {
@@ -103,6 +103,14 @@ func repl() {
 			}
 		}
 	}
+}
+
+func appendHistory(cmds []string) {
+	// for security reason, hide the password with ******
+	if len(cmds) == 2 && strings.ToLower(cmds[0]) == "auth" {
+		cmds[1] = "******"
+	}
+	line.AppendHistory(strings.Join(cmds, " "))
 }
 
 func cliSendCommand(cmds []string) {
