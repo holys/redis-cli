@@ -106,11 +106,20 @@ func repl() {
 }
 
 func appendHistory(cmds []string) {
-	// for security reason, hide the password with ******
-	if len(cmds) == 2 && strings.ToLower(cmds[0]) == "auth" {
-		cmds[1] = "******"
+	// make a copy of cmds
+	cloneCmds := make([]string, len(cmds))
+	for i, cmd := range cmds {
+		cloneCmds[i] = cmd
 	}
-	line.AppendHistory(strings.Join(cmds, " "))
+
+	// for security reason, hide the password with ******
+	if len(cloneCmds) == 2 && strings.ToLower(cloneCmds[0]) == "auth" {
+		cloneCmds[1] = "******"
+	}
+	if len(cloneCmds) == 4 && strings.ToLower(cloneCmds[0]) == "connect" {
+		cloneCmds[3] = "******"
+	}
+	line.AppendHistory(strings.Join(cloneCmds, " "))
 }
 
 func cliSendCommand(cmds []string) {
