@@ -15,6 +15,7 @@ Fully compatible with [Redis Protocol specification](https://redis.io/topics/pro
 - Non-interactively execute command 
 - Raw format output
 - Monitor command support (both in REPL and execution directly)
+- CONNECT command support(example is as follows)
 
 ### Install 
 
@@ -67,6 +68,19 @@ OK
 1483327139.767084 [0 127.0.0.1:61344] "PING"
  ...
 
+---
+New command support: CONNECT host port [auth]
+
+$ ./redis-cli
+127.0.0.1:6379> set hostport "127.0.0.1:6379"
+OK
+127.0.0.1:6379> get hostport
+"127.0.0.1:6379"
+127.0.0.1:6379> connect 127.0.0.1 6380
+connected 127.0.0.1:6380 successfully
+127.0.0.1:6380> get hostport
+(nil)
+127.0.0.1:6380>
 ```
 
 ### Why I build this?
