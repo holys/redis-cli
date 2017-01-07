@@ -24,7 +24,7 @@ var (
 
 var (
 	line        *liner.State
-	historyPath = path.Join(os.Getenv("HOME"), ".rediscli_history") // $HOME/.rediscli_history
+	historyPath = path.Join(os.Getenv("HOME"), ".gorediscli_history") // $HOME/.gorediscli_history
 
 	mode int
 
