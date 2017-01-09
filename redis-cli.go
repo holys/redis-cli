@@ -14,12 +14,13 @@ import (
 )
 
 var (
-	hostname  = flag.String("h", "127.0.0.1", "Server hostname")
-	port      = flag.Int("p", 6379, "Server server port")
-	socket    = flag.String("s", "", "Server socket. (overwrites hostname and port)")
-	dbn       = flag.Int("n", 0, "Database number(default 0)")
-	auth      = flag.String("a", "", "Password to use when connecting to the server")
-	outputRaw = flag.Bool("raw", false, "Use raw formatting for replies")
+	hostname    = flag.String("h", "127.0.0.1", "Server hostname")
+	port        = flag.Int("p", 6379, "Server server port")
+	socket      = flag.String("s", "", "Server socket. (overwrites hostname and port)")
+	dbn         = flag.Int("n", 0, "Database number(default 0)")
+	auth        = flag.String("a", "", "Password to use when connecting to the server")
+	outputRaw   = flag.Bool("raw", false, "Use raw formatting for replies")
+	showWelcome = flag.Bool("show", false, "show welcome message, mainly for web usage via gotty")
 )
 
 var (
@@ -68,6 +69,10 @@ func repl() {
 	prompt := ""
 
 	cliConnect()
+
+	if *showWelcome {
+		showWelcomeMsg()
+	}
 
 	for {
 		addr := addr()
@@ -419,4 +424,13 @@ func saveHistory() {
 		line.WriteHistory(f)
 		f.Close()
 	}
+}
+
+func showWelcomeMsg() {
+	welcome := `
+	Welcome to redis-cli online.
+	You can switch to different redis instance with the CONNECT command. 
+	Usage: CONNECT host port [auth]
+	`
+	fmt.Println(welcome)
 }
