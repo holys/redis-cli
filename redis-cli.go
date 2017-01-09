@@ -103,6 +103,8 @@ func repl() {
 				println("Please use Ctrl + L instead")
 			} else if cmd == "connect" {
 				reconnect(cmds[1:])
+			} else if cmd == "mode" {
+				switchMode(cmds[1:])
 			} else {
 				cliSendCommand(cmds)
 			}
@@ -226,6 +228,28 @@ func reconnect(args []string) {
 	}
 
 	fmt.Printf("connected %s:%s successfully \n", h, p)
+}
+
+func switchMode(args []string) {
+	if len(args) != 1 {
+		fmt.Println("invalid args. Should be MODE [raw|std]")
+		return
+	}
+
+	m := strings.ToLower(args[0])
+	if m != "raw" && m != "std" {
+		fmt.Println("invalid args. Should be MODE [raw|std]")
+		return
+	}
+
+	switch m {
+	case "std":
+		mode = stdMode
+	case "raw":
+		mode = rawMode
+	}
+
+	return
 }
 
 func addr() string {
@@ -431,6 +455,10 @@ func showWelcomeMsg() {
 	Welcome to redis-cli online.
 	You can switch to different redis instance with the CONNECT command. 
 	Usage: CONNECT host port [auth]
+
+	Switch output mode with MODE command. 
+
+	Usage: MODE [std | raw]
 	`
 	fmt.Println(welcome)
 }
