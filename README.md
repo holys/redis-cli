@@ -83,6 +83,14 @@ connected 127.0.0.1:6380 successfully
 127.0.0.1:6380>
 ```
 
+
+## Play with gotty 
+
+gotty -w  ./redis-cli 
+
+![screenshot](redis-cli-gotty.gif)
+
+
 ### Why I build this?
 
 Sometimes I would like to access to the redis-server(or redis-proxy), but there is no redis-cli in the
