@@ -20,7 +20,7 @@ var (
 	dbn         = flag.Int("n", 0, "Database number(default 0)")
 	auth        = flag.String("a", "", "Password to use when connecting to the server")
 	outputRaw   = flag.Bool("raw", false, "Use raw formatting for replies")
-	showWelcome = flag.Bool("show", false, "show welcome message, mainly for web usage via gotty")
+	showWelcome = flag.Bool("welcome", false, "show welcome message, mainly for web usage via gotty")
 )
 
 var (

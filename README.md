@@ -86,7 +86,7 @@ connected 127.0.0.1:6380 successfully
 
 ## Play with gotty 
 
-gotty -w  ./redis-cli 
+gotty -w  ./redis-cli --welcome
 
 ![screenshot](redis-cli-gotty.gif)
 
