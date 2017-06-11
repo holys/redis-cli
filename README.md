@@ -84,7 +84,7 @@ connected 127.0.0.1:6380 successfully
 ```
 
 
-## Play with gotty 
+## Play with [GoTTY](https://github.com/yudai/gotty)
 
 gotty -w  ./redis-cli --welcome
 
