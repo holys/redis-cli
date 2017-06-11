@@ -3,6 +3,7 @@ package main
 
 var helpCommands = [][]string{
 	{"APPEND", "key value", "KV"},
+    {"AUTH", "password", "Server"},
 	{"BITCOUNT", "key [start] [end]", "KV"},
 	{"BITOP", "operation destkey key [key ...]", "KV"},
 	{"BITPOS", "key bit [start] [end]", "KV"},
@@ -49,6 +50,7 @@ var helpCommands = [][]string{
 	{"INCR", "key", "KV"},
 	{"INCRBY", "key increment", "KV"},
 	{"INFO", "[section]", "Server"},
+    {"KEYS", "pattern", "KV"},
 	{"LCLEAR", "key", "List"},
 	{"LDUMP", "key", "List"},
 	{"LEXPIRE", "key seconds", "List"},

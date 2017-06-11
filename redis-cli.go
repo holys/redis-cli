@@ -426,7 +426,7 @@ func sendPing(client *goredis.Client) error {
 func setCompletionHandler() {
 	line.SetCompleter(func(line string) (c []string) {
 		for _, i := range helpCommands {
-			if strings.HasPrefix(i[0], strings.ToLower(line)) {
+			if strings.HasPrefix(i[0], strings.ToUpper(line)) {
 				c = append(c, i[0])
 			}
 		}
