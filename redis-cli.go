@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	hostname    = flag.String("h", "127.0.0.1", "Server hostname")
-	port        = flag.Int("p", 6379, "Server server port")
+	hostname    = flag.String("h", getEnv("REDIS_HOST", "127.0.0.1"), "Server hostname")
+	portStr     = flag.String("p", getEnv("REDIS_PORT", "6379"), "Server server port")
 	socket      = flag.String("s", "", "Server socket. (overwrites hostname and port)")
 	dbn         = flag.Int("n", 0, "Database number(default 0)")
 	auth        = flag.String("a", "", "Password to use when connecting to the server")
@@ -24,6 +24,7 @@ var (
 )
 
 var (
+	port        *int
 	line        *liner.State
 	historyPath = path.Join(os.Getenv("HOME"), ".gorediscli_history") // $HOME/.gorediscli_history
 
@@ -41,6 +42,12 @@ const (
 func main() {
 	flag.Parse()
 
+	portInt, err := strconv.Atoi(*portStr)
+	if err != nil {
+		fmt.Printf("(error) %s", err.Error())
+	}
+	port = &portInt
+
 	if *outputRaw {
 		mode = rawMode
 	} else {
@@ -53,6 +60,14 @@ func main() {
 	}
 
 	noninteractive(flag.Args())
+}
+
+func getEnv(key string, defaultValue string) string {
+	value, found := os.LookupEnv(key)
+	if !found {
+		return defaultValue
+	}
+	return value
 }
 
 // Read-Eval-Print Loop
