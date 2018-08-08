@@ -15,7 +15,7 @@ import (
 
 var (
 	hostname    = flag.String("h", getEnv("REDIS_HOST", "127.0.0.1"), "Server hostname")
-	portStr     = flag.String("p", getEnv("REDIS_PORT", "6379"), "Server server port")
+	port        = flag.String("p", getEnv("REDIS_PORT", "6379"), "Server server port")
 	socket      = flag.String("s", "", "Server socket. (overwrites hostname and port)")
 	dbn         = flag.Int("n", 0, "Database number(default 0)")
 	auth        = flag.String("a", "", "Password to use when connecting to the server")
@@ -24,7 +24,6 @@ var (
 )
 
 var (
-	port        *int
 	line        *liner.State
 	historyPath = path.Join(os.Getenv("HOME"), ".gorediscli_history") // $HOME/.gorediscli_history
 
@@ -41,12 +40,6 @@ const (
 
 func main() {
 	flag.Parse()
-
-	portInt, err := strconv.Atoi(*portStr)
-	if err != nil {
-		fmt.Printf("(error) %s", err.Error())
-	}
-	port = &portInt
 
 	if *outputRaw {
 		mode = rawMode
@@ -232,8 +225,7 @@ func reconnect(args []string) {
 
 	// change prompt
 	hostname = &h
-	intp, _ := strconv.Atoi(p)
-	port = &intp
+	port = &p
 
 	if auth != "" {
 		err := sendAuth(client, auth)
@@ -272,7 +264,7 @@ func addr() string {
 	if len(*socket) > 0 {
 		addr = *socket
 	} else {
-		addr = fmt.Sprintf("%s:%d", *hostname, *port)
+		addr = fmt.Sprintf("%s:%s", *hostname, *port)
 	}
 	return addr
 }
