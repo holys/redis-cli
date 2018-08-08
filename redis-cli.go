@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	hostname    = flag.String("h", "127.0.0.1", "Server hostname")
-	port        = flag.Int("p", 6379, "Server server port")
+	hostname    = flag.String("h", getEnv("REDIS_HOST", "127.0.0.1"), "Server hostname")
+	port        = flag.String("p", getEnv("REDIS_PORT", "6379"), "Server server port")
 	socket      = flag.String("s", "", "Server socket. (overwrites hostname and port)")
 	dbn         = flag.Int("n", 0, "Database number(default 0)")
 	auth        = flag.String("a", "", "Password to use when connecting to the server")
@@ -53,6 +53,14 @@ func main() {
 	}
 
 	noninteractive(flag.Args())
+}
+
+func getEnv(key string, defaultValue string) string {
+	value, found := os.LookupEnv(key)
+	if !found {
+		return defaultValue
+	}
+	return value
 }
 
 // Read-Eval-Print Loop
@@ -217,8 +225,7 @@ func reconnect(args []string) {
 
 	// change prompt
 	hostname = &h
-	intp, _ := strconv.Atoi(p)
-	port = &intp
+	port = &p
 
 	if auth != "" {
 		err := sendAuth(client, auth)
@@ -257,7 +264,7 @@ func addr() string {
 	if len(*socket) > 0 {
 		addr = *socket
 	} else {
-		addr = fmt.Sprintf("%s:%d", *hostname, *port)
+		addr = fmt.Sprintf("%s:%s", *hostname, *port)
 	}
 	return addr
 }
