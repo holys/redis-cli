@@ -32,7 +32,7 @@ var (
 	client *goredis.Client
 )
 
-//output
+// output
 const (
 	stdMode = iota
 	rawMode
@@ -106,6 +106,9 @@ func repl() {
 			if cmd == "help" || cmd == "?" {
 				printHelp(cmds)
 			} else if cmd == "quit" || cmd == "exit" {
+				saveHistory()
+				line.Close()
+
 				os.Exit(0)
 			} else if cmd == "clear" {
 				println("Please use Ctrl + L instead")
